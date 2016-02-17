@@ -29,7 +29,7 @@ It should be noticed that the following mf-agent plugins and metrics need to be 
 | RAPL            |   DRAM_ENERGY:PACKAGE0                          |
 | RAPL            |   DRAM_ENERGY:PACKAGE1                          |
 | NVIDIA          |   power_usage = on                              |
-|-----------------|-------------------------------------------------| 
+
 
 Secondly a working StarPU is required. User can easily get the newest version of StarPU in the homepage http://starpu.gforge.inria.fr/.  
 
