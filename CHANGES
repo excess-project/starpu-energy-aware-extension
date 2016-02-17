@@ -1,0 +1,15 @@
+# RELEASE NOTES
+
+## 0.1 (16/02/2016)
+
+### Features
+- First prototype of StarPU Monitoring Broker with 2 APIs:
+	mf_starpu_init();
+	mf_starpu_task_train();
+- StarPU Monitoring Broker is prepared as a library for general use.
+- Test Experiments written and testing done on EXCESS cluster at HLRS.
+- Scripts for running test cases are written for each experiment.
+- Test results evaluation. Generating Performance model and power model as defined and plotting figures with respect to performance and power data.
+
+### Remarks
+

@@ -1,0 +1,29 @@
+#!/bin/sh -f
+DBKEY=12345678
+ROOT=`pwd`/../..
+#start mf_server
+${ROOT}/bin/mf/monitoring-server/start.sh
+
+#start mf_agent
+CONFIG=${ROOT}/bin/mf/monitoring-agent/dist/mf_config.ini
+MF_START_BIN=${ROOT}/bin/mf/monitoring-agent/dist/start.sh
+${MF_START_BIN} -i ${DBKEY} -c ${CONFIG}
+
+#start testing
+declare -a SIZE_ARRAY=(1200 1600 2400 4800 9600 19200)
+TRAIN_LOOPS=1000
+EXECUTABLE=`pwd`/vector_scal
+
+sleep 5
+for SIZE in "${SIZE_ARRAY[@]}"; do
+	echo "$( date +'%c' ): start vector_scal, size = ${SIZE}, TRAIN_LOOPS = ${TRAIN_LOOPS}"
+	${EXECUTABLE} -NX ${SIZE} -dbkey ${DBKEY} -train ${TRAIN_LOOPS}
+	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
+done
+
+#stop mf_agent
+MF_STOP_BIN=${ROOT}/bin/mf/monitoring-agent/dist/stop.sh
+${MF_STOP_BIN}
+
+#stop mf_server
+${ROOT}/bin/mf/monitoring-server/stop.sh

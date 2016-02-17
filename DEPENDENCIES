@@ -1,0 +1,8 @@
+% EXCESS StarPU Energy Aware Extension
+% Copyright (C) 2016 University of Stuttgart
+
+# List of Dependencies
+
+| Component         | Homepage                                          | Version   |
+|------------------ |-------------------------------------------------  |---------  |
+| JSMN              | http://zserge.com/jsmn.html                       |           |
