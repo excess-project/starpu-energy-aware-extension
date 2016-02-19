@@ -11,15 +11,6 @@ StarPU benefits the application in runtime with data management and scheduling p
 
 The StarPU Monitoring Broker requires first a running monitoring framework (with both server and agent). In order to install this requirements, please checkout the associated [monitoring server][server] and [monitoring agent][agent].Please note that the installation and setup steps mentioned below assume that you are running a current Linux as operating system.
 
-Before you can proceed, please clone these repositories:
-
-```bash
-git clone git://github.com/excess-project/monitoring-server.git
-```
-
-```bash
-git clone git://github.com/excess-project/monitoring-agent.git
-```
 It should be noticed that the following mf-agent plugins and metrics need to be turned on for the StarPU Monitoring Broker.
 
 | Plugins         | Metrics                                         | 
@@ -58,7 +49,7 @@ make clean all
 compiles and builds the StarPU Monitoring Broker libraries, which can be reused directly in a StarPU application.
 
 
-## Experiments
+## Examples
 
 All experiments are stored in the directory "examples", and are modified based on the associated StarPU examples to use library generated above. 
 
@@ -70,9 +61,75 @@ Following is a list of all experiments
 - vectorscal_regression
 
 
+## Tutorial
+
+Following is a modified simple example based on StarPU "mult" example, illustrating how to use the StarPU Monitoring Broker library.
+
+#include <starpu.h>
+#include "mf_starpu_utils.h"
+ 
+/* skip unmodified source code */
+  
+/* data structure to hold the power model */
+static struct starpu_perfmodel dgemm_power_model = {
+	.type = STARPU_HISTORY_BASED,
+	.symbol = dgemm_history_power
+};
+  
+static struct starpu_codelet cl = {
+	.type = STARPU_SEQ,
+	.max_parallelism = INT_MAX,
+	.cpu_funcs = {cpu_mult},
+#ifdef STARPU_USE_CUDA
+	.cuda_funcs = {cublas_mult},
+#endif
+	.nbuffers = 3,
+	.modes = {STARPU_R, STARPU_R, STARPU_RW},
+	.model = &dgemm_perf_model,
+	.power_model = &dgemm_power_model /* link power model to codelet */
+};
+ 
+int main(int argc, char **argv) {
+	double start, end;
+    int ret;
+  
+    parse_args(argc, argv);
+  
+    ret = mf_starpu_init(NULL, argc, argv); /* starpu_init(NULL); */
+    if (ret == -1)
+      return 77;
+  
+    /* skipped unmodified source code */
+
+    unsigned x, y, iter;
+    for (iter = 0; iter < niter; iter++) {
+      for (x = 0; x < nslicesx; x++)
+      for (y = 0; y < nslicesy; y++) {
+        struct starpu_task *task = starpu_task_create();
+  
+        /* skipped unmodified source code */
+  
+        ret = mf_starpu_task_training(task); /* starpu_task_submit() */
+        if(ret == -1)
+          ret = 77;
+          goto enodev;
+      }
+  
+      starpu_task_wait_for_all();
+    }
+
+    /* skipped unmodified source code */
+
+    starpu_cublas_shutdown();
+    starpu_shutdown();
+  
+    return ret;
+}
+
+
 ## Acknowledgment
 
-This project is realized through [EXCESS][excess]. EXCESS is funded by the EU 7th Framework Programme (FP7/2013-2016) under grant agreement number 611183. We are also collaborating with the European project [DreamCloud][dreamcloud].
+This project is realized through [EXCESS][excess]. EXCESS is funded by the EU 7th Framework Programme (FP7/2013-2016) under grant agreement number 611183.
 
 
 ## Contributing
@@ -95,7 +152,7 @@ Please [create](https://github.com/excess-project/starpu-energy-aware-extension/
 
 | Date        | Version | Comment          |
 | ----------- | ------- | ---------------- |
-| 2016-02-20  | 0.1     | Public release.  |
+| 2016-02-20  | 1.0     | Public release.  |
 
 
 ## License

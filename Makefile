@@ -1,3 +1,6 @@
+## Copyright (C) 2016 University of Stuttgart
+## Authors: Fangli Pi
+
 CC       = gcc
 CFLAGS   = -Wall $(INC_MF) $(INC_STARPU) ${INC_EXT} -O3 -g
 LFLAGS   = $(MF_LIB) $(PARSER_LIB) $(PUBLISHER_LIB) -Wl,-rpath-link,lib

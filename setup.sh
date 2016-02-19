@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## Copyright (C) 2016 University of Stuttgart
+## Authors: Fangli Pi
+
 ROOT=`pwd`
 BINARY_FOLDER=${ROOT}/bin
 INSTALL_PATH_STARPU=${BINARY_FOLDER}/starpu
@@ -51,7 +54,16 @@ echo "> monitoring agent"
 cd ${INSTALL_PATH_MF}
 git clone https://github.com/excess-project/monitoring-agent
 cd monitoring-agent
+git checkout tags/1.0.2
+git pull
 ./setup.sh
 make
 make install
 echo "Done"
+
+#
+# CLONE AND PREPARE jsmn.c jsmn.h
+#
+cd $ROOT
+git clone https://github.com/zserge/jsmn.git
+mv jsmn ext

@@ -1,3 +1,28 @@
+/*
+ * Copyright (C) 2016 University of Stuttgart
+ *
+ * mf_starpu_utils is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or (at
+ * your option) any later version.
+ *
+ * See the GNU Lesser General Public License in LICENSE for more details.
+ */
+
+/** @file mf_starpu_utils.h
+ *  @brief Interface to train StarPU tasks with respect to energy consumption.
+ *
+ *  This interface declares a means to retrieve energy measurements from
+ *  monitoring framework and then feed the values to StarPU power model.
+ *  Please see the {@link } for a
+ *  usage example. Per default, a developer should first determine if the
+ *  library is installed (#libmfstarpu.a), then initialize StarPU and 
+ *  Monitoring Framework API via calling #mf_starpu_init, finally submitting 
+ *  the training tasks with #mf_starpu_task_training.
+ *
+ *  @author Fangli Pi
+ */
+
 #include <unistd.h>
 #include <starpu.h>
 #include <starpu_scheduler.h>
@@ -56,7 +81,7 @@ int mf_starpu_init(struct starpu_conf *conf, char *execution_id)
 		printf("ERROR: starpu_init failed.\n");
 		return -1;
 	}
-	mf_api_initialize("http://192.168.0.160:3000", execution_id);
+	mf_api_initialize(SERVER, execution_id);
 	if(starpu_profiling_status_set(STARPU_PROFILING_ENABLE) < 0) {
      //enable profiling failed
     	printf("ERROR: starpu_profiling_status_set failed.\n");
