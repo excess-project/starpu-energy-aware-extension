@@ -34,21 +34,58 @@
 #include <starpu_util.h>
 #include <mf_api.h>
 #include <jsmn.h>
+#include <math.h>
 #include "mf_starpu_utils.h"
 
-int mf_starpu_get_execution_id(int argc, char **argv, char *exe_id)
+int mf_starpu_get_user(int argc, char **argv, char *user)
 {
 	int i;
 	for (i = 1; i < argc; i++)
 	{
-		if (strcmp(argv[i], "-dbkey") == 0)
+		if (strcmp(argv[i], "-user") == 0)
 		{
-			strcpy(exe_id, argv[++i]);
+			strcpy(user, argv[++i]);
 			break;
 		}
 	}
-	if(strlen(exe_id) == 0) {
-		printf("ERROR: no mf execution_id is given.\n");
+	if(strlen(user) == 0) {
+		printf("ERROR: no mf workflow is given.\n");
+		return -1;
+	}
+	return 0;
+}
+
+int mf_starpu_get_task(int argc, char **argv, char *task)
+{
+	int i;
+	for (i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "-task") == 0)
+		{
+			strcpy(task, argv[++i]);
+			break;
+		}
+	}
+	if(strlen(task) == 0) {
+		printf("ERROR: no mf task is given.\n");
+		return -1;
+	}
+	return 0;
+}
+
+int mf_starpu_get_experiment_id(int argc, char **argv, char *exp_id)
+{
+	int i;
+	for (i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "-exp") == 0)
+		{
+			strcpy(exp_id, argv[++i]);
+			break;
+		}
+	}
+	if(strlen(exp_id) == 0) {
+		printf("ERROR: no mf experiment_id is given.\n");
 		return -1;
 	}
 	return 0;
@@ -74,16 +111,17 @@ int mf_starpu_get_train_loops(int argc, char **argv)
 	return loops;
 }
 
-int mf_starpu_init(struct starpu_conf *conf, char *execution_id)
+int mf_starpu_init(struct starpu_conf *conf, char *user, char *task, char *exp_id)
 {
 	int ret = starpu_init(conf);
 	if (ret == -ENODEV) {
 		printf("ERROR: starpu_init failed.\n");
 		return -1;
 	}
-	mf_api_initialize(SERVER, execution_id);
+	mf_api_initialize(SERVER, user, exp_id, task);
+	
 	if(starpu_profiling_status_set(STARPU_PROFILING_ENABLE) < 0) {
-     //enable profiling failed
+    //enable profiling failed
     	printf("ERROR: starpu_profiling_status_set failed.\n");
     	return -1;
 	}
@@ -165,6 +203,14 @@ double get_gpu_energy(long double start_time, long double end_time)
 	return -1;
 }
 
+void convert_time(long double seconds, struct timeval *tv)
+{
+	long int sec  = (long int) floorl(seconds);
+	long int usec = (long int) ((seconds * 10e8) - (sec * 10e8) *1e-3);
+	tv->tv_sec = (time_t) sec;
+	tv->tv_usec = (time_t) usec;
+}
+
 //get from mf_agent the power data, using mf_api.h and jsmn.h
 float get_mf_power_data(long double start_time, long double end_time, char *Metric) 
 {
@@ -175,6 +221,10 @@ float get_mf_power_data(long double start_time, long double end_time, char *Metr
 	jsmn_parser p;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 
+	struct timeval tv_start, tv_end;
+	convert_time(start_time, &tv_start);
+	convert_time(end_time, &tv_end);
+
 	printf("\nGet energy data from MF:\n");
    	char *response = malloc(10000 * sizeof(char));
    	if(response == NULL){
@@ -182,7 +232,8 @@ float get_mf_power_data(long double start_time, long double end_time, char *Metr
    		return -1;
    	}
    	memset(response, 0, 10000);
-   	stats_data_by_metric(Metric, start_time, end_time, response);
+   	//stats_data_by_metric(Metric, start_time, end_time, response);
+   	mf_api_stats_data_by_interval(Metric, tv_start, tv_end, response);
    	
    	if(strlen(response) == 0){
    		printf("\nERROR: Get energy data from MF failed.\n");

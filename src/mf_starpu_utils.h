@@ -37,7 +37,7 @@
 #define GPU_ENERGY 2
 #define ALL_ENERGY 3
 
-static const char SERVER[]= "http://192.168.0.160:3000";
+static const char SERVER[]= "http://192.168.0.160:3030";
 
 /** @brief Train StarPU task with power model
  *
@@ -112,13 +112,31 @@ double get_cpu_energy(long double start_time, long double end_time);
 double mf_starpu_get_energy(long double start_t, long double end_t, unsigned ENERGY_TYPE);
 
 
-/** @brief Get execution id for accessing monitoring framework
+/** @brief Get user(workflow)(PBS_USER) for accessing monitoring framework
  *
- *  This function reads the input arguments after "-dbkey" as the execution id
+ *  This function reads the input arguments after "-user" as the user
  *  
  *  @return 0 on success; -1 otherwise
  */
-int mf_starpu_get_execution_id(int argc, char **argv, char *exe_id);
+int mf_starpu_get_user(int argc, char **argv, char *user);
+
+
+/** @brief Get task(task)(PBS_JOBNAME) for accessing monitoring framework
+ *
+ *  This function reads the input arguments after "-task" as the task
+ *  
+ *  @return 0 on success; -1 otherwise
+ */
+int mf_starpu_get_task(int argc, char **argv, char *task);
+
+
+/** @brief Get experiment_id(experiment_id)(DBKEY) for accessing monitoring framework
+ *
+ *  This function reads the input arguments after "-exp" as the experiment_id
+ *  
+ *  @return 0 on success; -1 otherwise
+ */
+int mf_starpu_get_experiment_id(int argc, char **argv, char *exp_id);
 
 
 /** @brief Get train loops for the StarPU task
@@ -138,7 +156,7 @@ int mf_starpu_get_train_loops(int argc, char **argv);
  * 
  *  @return 0 on success; -1 otherwise
  */
-int mf_starpu_init(struct starpu_conf *conf, char *execution_id);
+int mf_starpu_init(struct starpu_conf *conf, char *user, char *task, char *exp_id);
 
 
 /** @brief Get the current timestamps in seconds
@@ -146,5 +164,11 @@ int mf_starpu_init(struct starpu_conf *conf, char *execution_id);
  *  @return current timestamp
  */
 long double mf_starpu_time(void);
+
+
+/** @brief convert given timestamps in seconds to timeval structure
+ *
+ */
+void convert_time(long double seconds, struct timeval *tv);
 
 #endif
