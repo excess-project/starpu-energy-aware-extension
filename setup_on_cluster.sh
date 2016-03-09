@@ -3,9 +3,13 @@
 ## Copyright (C) 2016 University of Stuttgart
 ## Authors: Fangli Pi
 
+
+module load amd/app-sdk/3.0.124.132-GA
+module load mpi/mpich/3.1-gnu-4.9.2
 # CUDA DIRECTORY ON CLUSTER
-CUDA_DIR=/opt/compiler/cuda/6.5/
-CUDA_LIB=/opt/compiler/cuda/6.5/lib64
+module load compiler/cuda/7.0
+CUDA_DIR=/opt/compiler/cuda/7.0/
+CUDA_LIB=/opt/compiler/cuda/7.0/lib64
 
 ROOT=`pwd`
 BINARY_FOLDER=${ROOT}/bin
@@ -26,14 +30,14 @@ cd $ROOT
 wget http://starpu.gforge.inria.fr/files/starpu-${STARPU_VERSION}.tar.gz
 tar xf starpu-${STARPU_VERSION}.tar.gz
 cd starpu-${STARPU_VERSION}
-./configure --prefix=${INSTALL_PATH_STARPU} --with-hwloc=${INSTALL_PATH_HWLOC} --with-cuda-dir=${CUDA_DIR} --with-cuda-lib-dir=${CUDA_LIB}
+./configure --prefix=${INSTALL_PATH_STARPU} --with-cuda-dir=${CUDA_DIR} --with-cuda-lib-dir=${CUDA_LIB}
 make
 make install
 
 #clean
 cd $ROOT
 rm starpu-${STARPU_VERSION}.tar.gz
-
+rm  -rf starpu-${STARPU_VERSION}
 
 # ============================================================================ #
 # CLONE AND PREPARE jsmn.c jsmn.h                                              #
