@@ -9,7 +9,7 @@
 #PBS -l walltime=00:10:00
 
 #PBS -l nodes=1:node01:ppn=20
-
+ROOT=/nas_home/hpcfapix/starpu-energy-aware-extension/examples/dgemm_history
 DBKEY_FILE=/nas_home/hpcfapix/.mf/dbkey/${PBS_JOBID}
 DBKEY=$(cat ${DBKEY_FILE})
 
@@ -18,7 +18,7 @@ echo "$( date +'%c' ) DBKEY is : ${DBKEY}"
 declare -a SIZE_ARRAY=(8 40 72 104 136 168 200 232)
 N=1
 ITER=10
-EXECUTABLE=`pwd`/dgemm_mf_starpu
+EXECUTABLE=${ROOT}/dgemm_mf_starpu
 
 export STARPU_NCPU=1
 export STARPU_NCUDA=0
@@ -30,8 +30,8 @@ for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ) [CPU] start dgemm_mf_starpu ..."
 	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}"
 	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}
-	cp Metrics.data Metrics_cpu_${SIZE}.data
-	rm Metrics.data
+	cp ${ROOT}/Metrics.data ${ROOT}/Metrics_cpu_${SIZE}.data
+	rm ${ROOT}/Metrics.data
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
 
@@ -46,7 +46,7 @@ for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ): [GPU] start dgemm_mf_starpu ..."
 	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}"
 	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}
-	cp Metrics.data Metrics_gpu_${SIZE}.data
-	rm Metrics.data
+	cp ${ROOT}/Metrics.data ${ROOT}/Metrics_gpu_${SIZE}.data
+	rm ${ROOT}/Metrics.data
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done

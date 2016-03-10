@@ -1,5 +1,12 @@
 #!/bin/bash
 
+module load amd/app-sdk/3.0.124.132-GA
+module load mpi/mpich/3.1-gnu-4.9.2
+module load compiler/cuda/7.0
+module load numlib/intel/mkl/11.1
+module load compiler/intel/14.0.2
+module load compiler/gnu/4.9.2
+
 ROOT=`pwd`
 LIB=${ROOT}/src
 LIB_MF=/opt/mf/stable/16.2/lib/
