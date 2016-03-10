@@ -43,8 +43,8 @@ export STARPU_CALIBRATE=1
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ) [CPU] start dgemm_mf_starpu ..."
-	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}
+	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}
 	cp ${ROOT}/examples/dgemm_history/Metrics.data ${ROOT}/examples/dgemm_history/Metrics_cpu_${SIZE}.data
 	rm ${ROOT}/examples/dgemm_history/Metrics.data
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
@@ -59,8 +59,8 @@ export STARPU_CALIBRATE=1
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ): [GPU] start dgemm_mf_starpu ..."
-	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -dbkey ${DBKEY}
+	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}
 	cp ${ROOT}/examples/dgemm_history/Metrics.data ${ROOT}/examples/dgemm_history/Metrics_gpu_${SIZE}.data
 	rm ${ROOT}/examples/dgemm_history/Metrics.data
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
