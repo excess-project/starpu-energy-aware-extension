@@ -3,7 +3,8 @@
 ## Copyright (C) 2016 University of Stuttgart
 ## Authors: Fangli Pi
 
-
+module load compiler/intel/14.0.2
+module load compiler/gnu/4.9.2
 module load amd/app-sdk/3.0.124.132-GA
 module load mpi/mpich/3.1-gnu-4.9.2
 # CUDA DIRECTORY ON CLUSTER
