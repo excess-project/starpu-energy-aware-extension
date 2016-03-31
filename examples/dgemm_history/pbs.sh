@@ -7,7 +7,7 @@
 #PBS -o /nas_home/hpcfapix/$PBS_JOBID.out
 #PBS -e /nas_home/hpcfapix/$PBS_JOBID.err
 #PBS -l walltime=00:10:00
-#PBS -l nodes=1:node01:ppn=20
+#PBS -l nodes=1:node03:ppn=20
 
 module load amd/app-sdk/3.0.124.132-GA
 module load mpi/mpich/3.1-gnu-4.9.2
@@ -44,9 +44,7 @@ sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ) [CPU] start dgemm_mf_starpu ..."
 	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}
-	cp ${ROOT}/examples/dgemm_history/Metrics.data ${ROOT}/examples/dgemm_history/Metrics_cpu_${SIZE}.data
-	rm ${ROOT}/examples/dgemm_history/Metrics.data
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user hpcfapix -task ${PBS_JOBNAME} -exp ${DBKEY}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
 
@@ -60,8 +58,6 @@ sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ): [GPU] start dgemm_mf_starpu ..."
 	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}
-	cp ${ROOT}/examples/dgemm_history/Metrics.data ${ROOT}/examples/dgemm_history/Metrics_gpu_${SIZE}.data
-	rm ${ROOT}/examples/dgemm_history/Metrics.data
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user hpcfapix -task ${PBS_JOBNAME} -exp ${DBKEY}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
