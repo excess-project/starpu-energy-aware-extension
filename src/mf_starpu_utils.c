@@ -216,7 +216,7 @@ float get_mf_power_data(long double start_time, long double end_time, char *Metr
 {
 	int i, r;
 	float avg = -1.0;
-	char tmp_string[100]={'\0'};
+	char tmp_string[500]={'\0'};
 	char tmp_avg[50]={'\0'};
 	jsmn_parser p;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
@@ -244,7 +244,7 @@ float get_mf_power_data(long double start_time, long double end_time, char *Metr
 	r = jsmn_parse(&p, response, strlen(response), t, sizeof(t)/sizeof(t[0]));
 	
 	for (i = 1; i < r; i++) {
-		memset(tmp_string, 0, 100);
+		memset(tmp_string, 0, 500);
 		memset(tmp_avg, 0, 50);
 		strncpy(tmp_string, response+t[i].start, t[i].end-t[i].start);
 		if(strcmp(tmp_string, "avg") == 0) {
