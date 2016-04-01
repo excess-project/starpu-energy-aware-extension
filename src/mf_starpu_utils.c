@@ -37,6 +37,30 @@
 #include <math.h>
 #include "mf_starpu_utils.h"
 
+/*performance model for mf_starpu*/
+static struct starpu_perfmodel mf_perf_model =
+{
+	.type = STARPU_HISTORY_BASED,
+	.symbol = "mf_history_perf"
+};
+
+/*power model for mf_starpu*/
+static struct starpu_perfmodel mf_power_model =
+{
+	.type = STARPU_HISTORY_BASED,
+	.symbol = "mf_history_power"
+};
+
+/*dummy codelet do nothing but only with performance and power model*/
+static struct starpu_codelet perf_power_cl =
+{
+	.nbuffers = 1,
+	.modes = {STARPU_W}
+	.model = &dgemm_perf_model,
+	.power_model = &dgemm_power_model
+};
+
+
 int mf_starpu_get_user(int argc, char **argv, char *user)
 {
 	int i;
@@ -292,6 +316,9 @@ int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl)
 {
 	struct timespec task_start_date;
 	struct timespec task_end_date;
+	long double task_start_time, task_end_time, task_duration;
+	int loops = 1;
+	int i;
 	task->synchronous = 1; //important for mf_starpu
 	task->destroy = 0; //task will be destroyed by hand, important for mf_starpu
 	
@@ -305,13 +332,49 @@ int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl)
 	
 	clock_gettime(CLOCK_REALTIME, &task_end_date);
 
-	long double task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
-	long double task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
+	task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
+	task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
+	task_duration = task_end_time - task_start_time;
 
-	double energy = mf_starpu_get_energy(task_start_time, task_end_time, ALL_ENERGY);
+	if (task_duration < 2.0 ) {
+		/*if task execution time is less than 2 seconds, repeat the task execution till 2 seconds*/
+		loops = (int) 2 / task_duration;
+		clock_gettime(CLOCK_REALTIME, &task_start_date);
+
+		for (i=0; i<loops; i++) {
+			ret = starpu_task_submit(task);
+			if(ret == -ENODEV){
+				printf("\n[ERROR] starpu_task_submit failed.\n");
+				return -1;
+			}
+		}
+
+		clock_gettime(CLOCK_REALTIME, &task_end_date);
+		task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
+		task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
+	}
+
+	double energy = (double) mf_starpu_get_energy(task_start_time, task_end_time, ALL_ENERGY) / loops;
 
 	mf_starpu_metrics_feed(task, nimpl, energy);
 
     starpu_task_destroy(task);
     return 0;
 }
+
+/*only used for asynchronous tasks*/
+void mf_starpu_asynchronous_feed(long double start_t, long double end_t, double energy, struct starpu_perfmodel_arch *arch)
+{
+	struct starpu_task task;
+	starpu_task_init(&task);
+	task.cl = &perf_power_cl;
+
+	/*calculate the time*/
+	float duration_us = (float)((end_t - start_t) * 1e6);
+	//printf("\n[INFO] starpu_perfmodel_update_history...\n");
+	starpu_perfmodel_update_history(&mf_perf_model, &task, arch, 0, 0, duration_us);
+	starpu_perfmodel_update_history(&mf_power_model, &task, arch, 0, 0, energy);
+
+	starpu_task_clean(&task);
+	
+}	

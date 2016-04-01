@@ -39,6 +39,15 @@
 
 static const char SERVER[]= "http://192.168.0.160:3030";
 
+
+/** @brief feed a dummy task with performance and power model using the value measured 
+ *
+ *  This function can be called for keeping records of asynchronous tasks.
+ *
+ */
+void mf_starpu_asynchronous_feed(long double start_t, long double end_t, double energy, struct starpu_perfmodel_arch *arch);
+
+
 /** @brief Train StarPU task with power model
  *
  *  This function should be called after #mf_starpu_init, 
