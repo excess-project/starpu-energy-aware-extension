@@ -333,11 +333,11 @@ int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl)
 
 	task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
 	task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
-	task_duration = task_end_time - task_start_time;
+	task_duration = (long double) (task_end_time - task_start_time)/ loops;
 
-	while (task_duration < 2.0 ) {
+	while ((task_end_time - task_start_time) < 2.0 ) {
 		/*if task execution time is less than 2 seconds, repeat the task execution till 2 seconds*/
-		loops = (int) 2 / task_duration;
+		loops = (int) 2 / task_duration + 1;
 		clock_gettime(CLOCK_REALTIME, &task_start_date);
 
 		for (i=0; i<loops; i++) {
@@ -351,7 +351,7 @@ int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl)
 		clock_gettime(CLOCK_REALTIME, &task_end_date);
 		task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
 		task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
-		task_duration = task_end_time - task_start_time;
+		task_duration = (long double) (task_end_time - task_start_time)/ loops;
 		printf("\nloops is %d\n", loops);
 		printf("\ntask_duration is :%Lf\n", task_duration);
 	}
