@@ -56,8 +56,8 @@ static struct starpu_codelet perf_power_cl =
 {
 	.nbuffers = 1,
 	.modes = {STARPU_W}
-	.model = &dgemm_perf_model,
-	.power_model = &dgemm_power_model
+	.model = &mf_perf_model,
+	.power_model = &mf_power_model
 };
 
 
