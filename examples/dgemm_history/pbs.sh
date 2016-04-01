@@ -32,7 +32,7 @@ echo "$( date +'%c' ) DBKEY is : ${DBKEY}"
 #start testing on cpu
 declare -a SIZE_ARRAY=(8 40 72 104 136 168 200 232)
 N=1
-ITER=10
+ITER=1
 EXECUTABLE=${ROOT}/examples/dgemm_history/dgemm_mf_starpu
 
 export STARPU_NCPU=1
