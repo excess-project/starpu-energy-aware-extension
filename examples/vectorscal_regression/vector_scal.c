@@ -79,20 +79,24 @@ int NX, TRAIN_LOOPS;
 float factor;
 float *vector;
 
-int mf_starpu_test(struct starpu_conf conf, char *dbkey);
+int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id);
 
 int main(int argc, char **argv)
 {
-	int i, ret;
+	int i;
 	struct starpu_conf conf;
-	char execution_id[40]= {'\0'};
 
-/*get execution id*/
-	ret = mf_starpu_get_execution_id(argc, argv, execution_id);
-	if(ret == -1) {
-		printf("ERROR: mf_starpu_get_execution_id failed.\n");
+/*get from input arguments user, task, and exp_id */
+	char user[40] = {'\0'};
+	char task[40] = {'\0'};
+	char exp_id[40] = {'\0'};
+
+	if(mf_starpu_get_user(argc, argv, user) == -1)
 		return -1;
-	}
+	if(mf_starpu_get_task(argc, argv, task) == -1)
+		return -1;
+	if(mf_starpu_get_experiment_id(argc, argv, exp_id)==-1)
+		return -1;
 
 /*get train loops*/
 	TRAIN_LOOPS = mf_starpu_get_train_loops(argc, argv);
@@ -127,7 +131,7 @@ int main(int argc, char **argv)
 	conf.nopencl = 0;
 	conf.calibrate = 1;
 	printf("TRAIN_LOOPS is: %d\n", TRAIN_LOOPS);
-    if(mf_starpu_test(conf, execution_id) == -1){
+    if(mf_starpu_test(conf, user, task, exp_id) == -1){
     	printf("\nERROR: mf_starpu_test for cpu failed.\n");
     	return -1;
     }
@@ -140,7 +144,7 @@ int main(int argc, char **argv)
 	conf.nopencl = 0;
 	conf.calibrate = 1;
 	printf("TRAIN_LOOPS is: %d\n", TRAIN_LOOPS);
-	if(mf_starpu_test(conf, execution_id) == -1){
+	if(mf_starpu_test(conf, user, task, exp_id) == -1){
     	printf("\nERROR: mf_starpu_test for gpu failed.\n");
     	return -1;
     }
@@ -150,15 +154,14 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-int mf_starpu_test(struct starpu_conf conf, char *exe_id)
+int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id)
 {
 	int i;
 	double energy;
-	/* mf_starpu_init for timing and mf_api */
-	if(mf_starpu_init(&conf, exe_id) == -1) {
-		printf("ERROR: mf_starpu_init failed.\n");
-		return -1;	
-	}
+	
+	if (mf_starpu_init(&conf, user, task, exp_id) == -1)
+		return -1;
+	
 	struct starpu_task **training_tasks = malloc(TRAIN_LOOPS * sizeof(struct starpu_task *));
 	
 	long double start_time = mf_starpu_time();
@@ -196,18 +199,12 @@ int mf_starpu_test(struct starpu_conf conf, char *exe_id)
 
 	long double end_time = mf_starpu_time();
 
-	energy = (double) mf_starpu_get_energy(start_time, end_time, CPU_ENERGY) / TRAIN_LOOPS;
-	if(energy <= 0) {
-		printf("ERROR: mf_starpu_get_energy failed.\n");
-		return -1;
-	}
-#ifdef STARPU_USE_CUDA
 	energy = (double) mf_starpu_get_energy(start_time, end_time, ALL_ENERGY) / TRAIN_LOOPS;
 	if(energy <= 0) {
 		printf("ERROR: mf_starpu_get_energy failed.\n");
 		return -1;
 	}
-#endif
+	
 	unsigned nimpl = 0;
 	for (i = 0; i < TRAIN_LOOPS; i++) {
 		mf_starpu_metrics_feed(training_tasks[i], nimpl, energy);

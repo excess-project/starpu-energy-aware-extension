@@ -1,4 +1,6 @@
 #!/bin/sh -f
+PBS_USER=root
+PBS_JOBNAME=vector_regression_testing
 DBKEY=12345678
 ROOT=`pwd`/../..
 #start mf_server
@@ -16,8 +18,8 @@ EXECUTABLE=`pwd`/vector_scal
 
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
-	echo "$( date +'%c' ): start vector_scal, size = ${SIZE}, TRAIN_LOOPS = ${TRAIN_LOOPS}"
-	${EXECUTABLE} -NX ${SIZE} -dbkey ${DBKEY} -train ${TRAIN_LOOPS}
+	echo "$( date +'%c' ): start vector_scal, size = ${SIZE}, user = ${PBS_USER}, task = ${PBS_JOBNAME}, exp = ${DBKEY}, TRAIN_LOOPS = ${TRAIN_LOOPS}"
+	${EXECUTABLE} -NX ${SIZE} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY} -train ${TRAIN_LOOPS}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
 
