@@ -317,24 +317,25 @@ int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl)
 	struct timespec task_start_date;
 	struct timespec task_end_date;
 	long double task_start_time, task_end_time, task_duration;
-	int loops = 1;
+	int loops = 100;
 	int i;
 	task->synchronous = 1; //important for mf_starpu
 	task->destroy = 0; //task will be destroyed by hand, important for mf_starpu
 	
 	clock_gettime(CLOCK_REALTIME, &task_start_date);
 
-	int ret = starpu_task_submit(task);
-	if(ret == -ENODEV){
-		printf("\n[ERROR] starpu_task_submit failed.\n");
-		return -1;
+	for(i=0; i<loops; i++){
+		int ret = starpu_task_submit(task);
+		if(ret == -ENODEV){
+			printf("\n[ERROR] starpu_task_submit failed.\n");
+			return -1;
+		}
 	}
-	
 	clock_gettime(CLOCK_REALTIME, &task_end_date);
 
 	task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
 	task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
-	task_duration = task_end_time - task_start_time;
+	task_duration = (long double) (task_end_time - task_start_time) / loops;
 
 	if (task_duration < 2.0 ) {
 		/*if task execution time is less than 2 seconds, repeat the task execution till 2 seconds*/
