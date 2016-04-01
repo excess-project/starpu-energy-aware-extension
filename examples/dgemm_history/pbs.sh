@@ -1,13 +1,13 @@
 #!/bin/sh -f
 #the job name is "dgemm_mf_starpu"
 #PBS -N dgemm_mf_starpu
-#PBS -q batch
+#PBS -q night
 
 #use the complite path to the standard output files
 #PBS -o /nas_home/hpcfapix/$PBS_JOBID.out
 #PBS -e /nas_home/hpcfapix/$PBS_JOBID.err
-#PBS -l walltime=00:10:00
-#PBS -l nodes=1:node03:ppn=20
+#PBS -l walltime=00:30:00
+#PBS -l nodes=1:node03:ppn=24
 
 module load amd/app-sdk/3.0.124.132-GA
 module load mpi/mpich/3.1-gnu-4.9.2
