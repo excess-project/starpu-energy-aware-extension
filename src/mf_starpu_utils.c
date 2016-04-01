@@ -352,8 +352,8 @@ int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl)
 		task_start_time = task_start_date.tv_sec + (long double) (task_start_date.tv_nsec / 10e8);
 		task_end_time = task_end_date.tv_sec + (long double) (task_end_date.tv_nsec / 10e8);
 		task_duration = (long double) (task_end_time - task_start_time)/ loops;
-		printf("\nloops is %d\n", loops);
-		printf("\ntask_duration is :%Lf\n", task_duration);
+		//printf("\nloops is %d\n", loops);
+		//printf("\ntask_duration is :%Lf\n", task_duration);
 	}
 
 	double energy = (double) mf_starpu_get_energy(task_start_time, task_end_time, ALL_ENERGY) / loops;
