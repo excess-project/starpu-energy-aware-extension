@@ -55,7 +55,7 @@ static struct starpu_perfmodel mf_power_model =
 static struct starpu_codelet perf_power_cl =
 {
 	.nbuffers = 1,
-	.modes = {STARPU_W}
+	.modes = {STARPU_W},
 	.model = &mf_perf_model,
 	.power_model = &mf_power_model
 };
