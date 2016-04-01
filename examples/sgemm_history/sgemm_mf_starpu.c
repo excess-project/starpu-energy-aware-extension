@@ -342,11 +342,18 @@ int main(int argc, char **argv)
 	if (ret == -ENODEV)
 		return 77;
 	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");*/
-	char exe_id[40]= {'\0'};
-	if(mf_starpu_get_execution_id(argc, argv, exe_id)==-1)
+	char user[40] = {'\0'};
+	char task[40] = {'\0'};
+	char exp_id[40] = {'\0'};
+
+	if(mf_starpu_get_user(argc, argv, user) == -1)
+		return -1;
+	if(mf_starpu_get_task(argc, argv, task) == -1)
+		return -1;
+	if(mf_starpu_get_experiment_id(argc, argv, exp_id)==-1)
 		return -1;
 
-	if (mf_starpu_init(NULL, exe_id) == -1)
+	if (mf_starpu_init(NULL, user, task, exp_id) == -1)
 		return -1;
 
 	starpu_cublas_init();

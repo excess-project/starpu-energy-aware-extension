@@ -1,4 +1,6 @@
 #!/bin/sh -f
+PBS_USER=root
+PBS_JOBNAME=sgemm_testing
 DBKEY=12345678
 ROOT=`pwd`/../..
 #start mf_server
@@ -22,10 +24,8 @@ export STARPU_SCHED=dmda
 export STARPU_CALIBRATE=1
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
-	echo "$( date +'%c' ): [CPU] start sgemm_mf_starpu, size = ${SIZE} * ${SIZE}, nblocks = ${N}, iter = ${ITER}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -dbkey ${DBKEY}
-	cp Metrics.data Metrics_cpu_${SIZE}.data
-	rm Metrics.data
+	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
 
@@ -37,10 +37,8 @@ export STARPU_SCHED=dmda
 export STARPU_CALIBRATE=1
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
-	echo "$( date +'%c' ): [GPU] start sgemm_mf_starpu, size = ${SIZE} * ${SIZE}, nblocks = ${N}, iter = ${ITER}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -dbkey ${DBKEY}
-	cp Metrics.data Metrics_gpu_${SIZE}.data
-	rm Metrics.data
+	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
 
