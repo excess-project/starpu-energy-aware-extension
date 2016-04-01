@@ -83,7 +83,7 @@ int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id
 
 int main(int argc, char **argv)
 {
-	int i, ret;
+	int i;
 	struct starpu_conf conf;
 
 /*get from input arguments user, task, and exp_id */

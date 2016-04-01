@@ -15,7 +15,6 @@ HOST=$(shell hostname)
 
 ifneq (,$(findstring excess,$(HOST)))
 	INC_MF=-I/opt/mf/stable/16.2/include
-	INC_STARPU=-Ibin/starpu/include/starpu/1.2/
 	CORE_LIBS=/opt/mf/stable/16.2/lib
 endif
 
