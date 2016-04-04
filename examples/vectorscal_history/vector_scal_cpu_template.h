@@ -56,7 +56,7 @@ void func_name(void *buffers[], void *cl_arg)                                  \
 	float *val = (float *)STARPU_VECTOR_GET_PTR(vector);                   \
                                                       \
 	/* scale the vector */                                                 \
-	for (i = 0; i < n; i++) { 
+	for (i = 0; i < n; i++) {                                       \
 	    val[i] = i + 0.1;                                          \
 		val[i] *= factor;                                             \
 	}                                                                  \
