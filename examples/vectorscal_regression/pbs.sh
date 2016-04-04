@@ -31,12 +31,12 @@ DBKEY=$(cat ${DBKEY_FILE})
 echo "$( date +'%c' ) DBKEY is : ${DBKEY}"
 #start testing on cpu
 declare -a SIZE_ARRAY=(1200 1600 2400 4800 9600 19200)
-TRAIN_LOOPS=1000
+TRAIN_LOOPS=100000
 EXECUTABLE=${ROOT}/examples/vectorscal_regression/vector_scal
 
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ): start vector_scal, size = ${SIZE}, user = ${PBS_USER}, task = ${PBS_JOBNAME}, exp = ${DBKEY}, TRAIN_LOOPS = ${TRAIN_LOOPS}"
-	${EXECUTABLE} -NX ${SIZE} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY} -train ${TRAIN_LOOPS}
+	${EXECUTABLE} -NX ${SIZE} -user hpcfapix -task ${PBS_JOBNAME} -exp ${DBKEY} -train ${TRAIN_LOOPS}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done

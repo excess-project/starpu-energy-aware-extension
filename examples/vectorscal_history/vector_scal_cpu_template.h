@@ -54,11 +54,10 @@ void func_name(void *buffers[], void *cl_arg)                                  \
 	 * cast it in (float *) since a vector could contain any type of       \
 	 * elements so that the .ptr field is actually a uintptr_t */          \
 	float *val = (float *)STARPU_VECTOR_GET_PTR(vector);                   \
-    for (i=0; i<n; i++) {                                                  \
-    	val[i] = (float)(rand());                                \
-    }                                                                      \
+                                                      \
 	/* scale the vector */                                                 \
-	for (i = 0; i < n; i++) {                                               \
+	for (i = 0; i < n; i++) { 
+	    val[i] = i + 0.1;                                          \
 		val[i] *= factor;                                             \
 	}                                                                  \
 }
