@@ -11,5 +11,21 @@
 - Scripts for running test cases are written for each experiment.
 - Test results evaluation. Generating Performance model and power model as defined and plotting figures with respect to performance and power data.
 
-### Remarks
 
+## 1.1 (05/04/2016)
+
+### Features
+- Stable and more flexible version of StarPU Energy-aware Extension with 10 APIs:
+	int mf_starpu_get_user(int argc, char **argv, char *user);
+	int mf_starpu_get_task(int argc, char **argv, char *task);
+	int mf_starpu_get_experiment_id(int argc, char **argv, char *exp_id);
+	int mf_starpu_get_train_loops(int argc, char **argv);
+	int mf_starpu_init(struct starpu_conf *conf, char *user, char *task, char *exp_id);
+	int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl);
+	double mf_starpu_get_energy(long double start_t, long double end_t, unsigned ENERGY_TYPE);
+	void mf_starpu_metrics_feed(struct starpu_task *task, unsigned nimpl, double energy);
+	void mf_starpu_show_expectation(struct starpu_task *task, unsigned nimpl);
+	long double mf_starpu_time(void);
+- Scripts are provided to setup prerequisites and set environments on the EXCESS cluster.
+- Makefile is able to build the source based on local machine or on the EXCESS cluster.
+- Examples are combined with pbs job scripts for submitting to the EXCESS cluster.

@@ -26,10 +26,16 @@ Secondly a working StarPU is required. User can easily get the newest version of
 
 To ease the process of setting up a development enviroment, we provide a basic script that downloads all dependencies, installs them locally in the project directory, and then performs some clean-up operations.
 
-Executing the following script
+Executing the following script locally 
 
 ```bash
 ./setup.sh
+```
+
+, or the following script on EXCESS cluster
+
+```bash
+./setup_on_cluster.sh
 ```
 
 results in a new directory named `bin`, which holds the required dependencies for compiling the project. And StarPU source directory is also kept with some important files, like the "config.log", which tells the system's hardware and driver status detected by StarPU.
@@ -39,10 +45,17 @@ results in a new directory named `bin`, which holds the required dependencies fo
 
 This section assumes that you've successfully installed all required dependencies as described in the previous paragraphs. 
 
-Executing the following commands 
+Executing the following commands locally
 
 ```bash
 source setenv.sh
+make clean all
+```
+
+, or the following script on EXCESS cluster
+
+```bash
+source setenv_on_cluster.sh
 make clean all
 ```
 
@@ -60,11 +73,27 @@ Following is a list of all experiments
 - vectorscal_history
 - vectorscal_regression
 
+For more details please refer to the README file in the "examples" directory.
+
 
 ## Tutorial
 
+The StarPU Monitoring Broker works like a normal library including the following functions (version 1.1):
+
+- int mf_starpu_get_user(int argc, char **argv, char *user);
+- int mf_starpu_get_task(int argc, char **argv, char *task);
+- int mf_starpu_get_experiment_id(int argc, char **argv, char *exp_id);
+- int mf_starpu_get_train_loops(int argc, char **argv);
+- int mf_starpu_init(struct starpu_conf *conf, char *user, char *task, char *exp_id);
+- int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl);
+- double mf_starpu_get_energy(long double start_t, long double end_t, unsigned ENERGY_TYPE);
+- void mf_starpu_metrics_feed(struct starpu_task *task, unsigned nimpl, double energy);
+- void mf_starpu_show_expectation(struct starpu_task *task, unsigned nimpl);
+- long double mf_starpu_time(void);
+
 Following is a modified simple example based on StarPU "mult" example, illustrating how to use the StarPU Monitoring Broker library.
 
+```bash
 #include <starpu.h>
 #include "mf_starpu_utils.h"
  
@@ -89,16 +118,27 @@ static struct starpu_codelet cl = {
 	.power_model = &dgemm_power_model /* link power model to codelet */
 };
  
-int main(int argc, char **argv) {
-	double start, end;
+int main(int argc, char **argv) 
+{
+    double start, end;
     int ret;
-  
+    
+    char user[40] = {'\0'};
+    char task[40] = {'\0'};
+    char exp_id[40] = {'\0'};
+
+    if(mf_starpu_get_user(argc, argv, user) == -1)
+      return -1;
+    if(mf_starpu_get_task(argc, argv, task) == -1)
+      return -1;
+    if(mf_starpu_get_experiment_id(argc, argv, exp_id)==-1)
+      return -1;
+
     parse_args(argc, argv);
-  
-    ret = mf_starpu_init(NULL, argc, argv); /* starpu_init(NULL); */
-    if (ret == -1)
-      return 77;
-  
+    
+    if (mf_starpu_init(NULL, user, task, exp_id) == -1)
+      return -1;
+
     /* skipped unmodified source code */
 
     unsigned x, y, iter;
@@ -108,8 +148,10 @@ int main(int argc, char **argv) {
         struct starpu_task *task = starpu_task_create();
   
         /* skipped unmodified source code */
-  
-        ret = mf_starpu_task_training(task); /* starpu_task_submit() */
+        
+        /* starpu_task_submit() 
+        0 is the nimpl */
+        ret = mf_starpu_task_training(task, 0); 
         if(ret == -1)
           ret = 77;
           goto enodev;
@@ -125,7 +167,7 @@ int main(int argc, char **argv) {
   
     return ret;
 }
-
+```
 
 ## Acknowledgment
 
@@ -153,6 +195,7 @@ Please [create](https://github.com/excess-project/starpu-energy-aware-extension/
 | Date        | Version | Comment          |
 | ----------- | ------- | ---------------- |
 | 2016-02-20  | 1.0     | Public release.  |
+| 2016-04-05  | 1.1     | Public release.  |
 
 
 ## License
