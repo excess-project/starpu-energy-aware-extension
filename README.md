@@ -52,7 +52,7 @@ source setenv.sh
 make clean all
 ```
 
-, or the following script on EXCESS cluster
+, or the following commands on EXCESS cluster
 
 ```bash
 source setenv_on_cluster.sh
