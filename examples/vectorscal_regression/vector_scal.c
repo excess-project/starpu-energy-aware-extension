@@ -158,18 +158,18 @@ int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id
 {
 	int i;
 	double energy;
-	
+	starpu_data_handle_t vector_handle;
+
 	if (mf_starpu_init(&conf, user, task, exp_id) == -1)
 		return -1;
-	
+
 	struct starpu_task **training_tasks = malloc(TRAIN_LOOPS * sizeof(struct starpu_task *));
-	
+
+	starpu_vector_data_register(&vector_handle, 0, (uintptr_t)vector, NX, sizeof(vector[0]));
+
 	long double start_time = mf_starpu_time();
 
 	for (i = 0; i < TRAIN_LOOPS; i++) {
-	
-		starpu_data_handle_t vector_handle;
-		starpu_vector_data_register(&vector_handle, 0, (uintptr_t)vector, NX, sizeof(vector[0]));
 		struct starpu_task *task = starpu_task_create();
 		task->synchronous = 1; //important for mf_starpu
 		task->destroy = 0; //task will be destroyed by hand, important for mf_starpu
@@ -191,10 +191,6 @@ int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id
 			printf("\n[ERROR] starpu_task_submit failed.\n");
 			return -1;
 		}
-		//STARPU_CHECK_RETURN_VALUE(ret, "starpu_task_submit");
-		/* StarPU does not need to manipulate the array anymore so we can stop
- 	 * monitoring it */
-		starpu_data_unregister(vector_handle);
 	}
 
 	long double end_time = mf_starpu_time();
@@ -204,13 +200,16 @@ int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id
 		printf("ERROR: mf_starpu_get_energy failed.\n");
 		return -1;
 	}
-	
+
 	unsigned nimpl = 0;
 	for (i = 0; i < TRAIN_LOOPS; i++) {
 		mf_starpu_metrics_feed(training_tasks[i], nimpl, energy);
 		starpu_task_destroy(training_tasks[i]);
 	}
-	
+
+	/* StarPU does not need to manipulate the array anymore so we can stop
+ 	 * monitoring it */
+	starpu_data_unregister(vector_handle);
 	free(training_tasks);
 	starpu_shutdown();
 	return 0;

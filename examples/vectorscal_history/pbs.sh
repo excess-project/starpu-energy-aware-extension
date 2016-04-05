@@ -27,16 +27,17 @@ export LD_LIBRARY_PATH
 
 DBKEY_FILE=/nas_home/hpcfapix/.mf/dbkey/${PBS_JOBID}
 DBKEY=$(cat ${DBKEY_FILE})
+PBS_USER=hpcfapix
 
 echo "$( date +'%c' ) DBKEY is : ${DBKEY}"
 #start testing on cpu
-declare -a SIZE_ARRAY=(1200 1600 2400 4800 9600 19200)
+declare -a SIZE_ARRAY=(1200 1400 1600 2000 2400 3200 4800 9600 19200 24000)
 TRAIN_LOOPS=100000
 EXECUTABLE=${ROOT}/examples/vectorscal_history/vector_scal
 
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ): start vector_scal, size = ${SIZE}, user = ${PBS_USER}, task = ${PBS_JOBNAME}, exp = ${DBKEY}, TRAIN_LOOPS = ${TRAIN_LOOPS}"
-	${EXECUTABLE} -NX ${SIZE} -user hpcfapix -task ${PBS_JOBNAME} -exp ${DBKEY} -train ${TRAIN_LOOPS}
+	${EXECUTABLE} -NX ${SIZE} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY} -train ${TRAIN_LOOPS}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
