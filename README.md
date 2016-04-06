@@ -11,7 +11,7 @@ StarPU benefits the application in runtime with data management and scheduling p
 
 The StarPU Monitoring Broker requires first a running monitoring framework (with both server and agent). In order to install this requirements, please checkout the associated [monitoring server][server] and [monitoring agent][agent].Please note that the installation and setup steps mentioned below assume that you are running a current Linux as operating system.
 
-It should be noticed that the following mf-agent plugins and metrics need to be turned on for the StarPU Monitoring Broker.
+It should be noticed that the following mf-agent plugins and metrics need to be turned on for the StarPU Monitoring Broker. There is already a monitoring framework configuration template (mf_config.ini) prepared in the main directory, users of EXCESS cluster can easily copy it to the mf directory for use.
 
 | Plugins         | Metrics                                         | 
 |-----------------|-------------------------------------------------| 
