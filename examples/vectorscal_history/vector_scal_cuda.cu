@@ -49,8 +49,8 @@ extern "C" void scal_cuda_func(void *buffers[], void *_args)
         vector_mult_cuda<<<nblocks,threads_per_block,0,starpu_cuda_get_local_stream()>>>(n, val, factor);
 
 	cudaStreamSynchronize(starpu_cuda_get_local_stream());
-
-    float *cpu_val = (float *)malloc(n*sizeof(float));
-    cudaMemcpy(cpu_val, val, n*sizeof(float), cudaMemcpyDeviceToHost);
+    /* data transferring from GPU to CPU */
+    //float *cpu_val = (float *)malloc(n*sizeof(float));
+    //cudaMemcpy(cpu_val, val, n*sizeof(float), cudaMemcpyDeviceToHost);
 
 }

@@ -15,8 +15,8 @@ CORE_LIBS=../../bin/mf/monitoring-agent/lib
 HOST=$(shell hostname)
 
 ifneq (,$(findstring excess,$(HOST)))
-	INC_MF=-I/opt/mf/stable/16.2/include
-	CORE_LIBS=/opt/mf/stable/16.2/lib
+	INC_MF=-I/opt/mf/stable/16.6/include
+	CORE_LIBS=/opt/mf/stable/16.6/lib
 endif
 
 MF_LIB=-L$(CORE_LIBS) -lmf

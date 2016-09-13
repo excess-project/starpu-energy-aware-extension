@@ -74,37 +74,12 @@ static struct starpu_codelet cl =
 struct starpu_opencl_program opencl_program;
 #endif
 
-/* global variables */
-int NX, TRAIN_LOOPS;
-float factor;
-float *vector;
-
-int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id);
-
 int main(int argc, char **argv)
 {
-	int i;
-	struct starpu_conf conf;
+	int i, NX;
 
-/*get from input arguments user, task, and exp_id */
-	char user[40] = {'\0'};
-	char task[40] = {'\0'};
-	char exp_id[40] = {'\0'};
-
-	if(mf_starpu_get_user(argc, argv, user) == -1)
-		return -1;
-	if(mf_starpu_get_task(argc, argv, task) == -1)
-		return -1;
-	if(mf_starpu_get_experiment_id(argc, argv, exp_id)==-1)
-		return -1;
-
-/*get train loops*/
-	TRAIN_LOOPS = mf_starpu_get_train_loops(argc, argv);
-	if(TRAIN_LOOPS <= 0) {
-		printf("ERROR: mf_starpu_get_train_loops failed.\n");
-		return -1;
-	}
 /* get NX */
+	NX = 0;
 	for (i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "-NX") == 0)
@@ -120,97 +95,52 @@ int main(int argc, char **argv)
 	}
 
 /* initialize data */
-	factor = 3.14;
-	vector = (float *)malloc(NX * sizeof(float));
+	float factor = 3.14;
+	float *vector = (float *)malloc(NX * sizeof(float));
 
-/*creat configure data for starpu using cpu*/
-	starpu_conf_init(&conf);
-	conf.sched_policy_name = "dmda";
-	conf.ncpus = 1;
-	conf.ncuda = 0;
-	conf.nopencl = 0;
-	conf.calibrate = 1;
-	printf("TRAIN_LOOPS is: %d\n", TRAIN_LOOPS);
-    if(mf_starpu_test(conf, user, task, exp_id) == -1){
-    	printf("\nERROR: mf_starpu_test for cpu failed.\n");
-    	return -1;
-    }
+/*mf_starpu_init*/
+	if (starpu_init(NULL) == -ENODEV)
+		return -1;
 
-/*creat configure data for starpu using gpu*/
-    starpu_conf_init(&conf);
-    conf.sched_policy_name = "dmda";
-	conf.ncpus = 0;
-	conf.ncuda = 1;
-	conf.nopencl = 0;
-	conf.calibrate = 1;
-	printf("TRAIN_LOOPS is: %d\n", TRAIN_LOOPS);
-	if(mf_starpu_test(conf, user, task, exp_id) == -1){
-    	printf("\nERROR: mf_starpu_test for gpu failed.\n");
-    	return -1;
-    }
+/* mf_starpu_init initializes Monitoring Framework API */
+	if (mf_starpu_init() == -1)
+		return -1;
+
+/*load starpu opencl*/
+#ifdef STARPU_USE_OPENCL
+	char opencl_file[] = "/nas_home/hpcfapix/starpu-energy-extension/examples/vectorscal_history/vector_scal_opencl_kernel.cl";
+	if (starpu_opencl_load_opencl_from_file(opencl_file, &opencl_program, NULL) == -1)
+		return -1;
+#endif
+
+/*starpu data register*/
+	starpu_data_handle_t vector_handle;
+	starpu_vector_data_register(&vector_handle, 0, (uintptr_t)vector, NX, sizeof(vector[0]));
+
+/*starpu_task creat*/
+	struct starpu_task *task = starpu_task_create();
+	task->cl = &cl;
+	task->handles[0] = vector_handle;
+	task->cl_arg = &factor;
+	task->cl_arg_size = sizeof(factor);
+
+/* Trains the StarPU task with energy monitoring data 
+ * The task may be executed for multiple times for getting more accurate energy values */
+	unsigned nimpl=0;
+	if(mf_starpu_task_training(task, nimpl)== -1) 
+		return -1;
+
+/*starpu_data_unregister*/
+	starpu_data_unregister(vector_handle);
 
 /* end of the testing program */
 	free(vector);
-	return 0;
-}
 
-int mf_starpu_test(struct starpu_conf conf, char *user, char *task, char *exp_id)
-{
-	int i;
-	double energy;
-	starpu_data_handle_t vector_handle;
-
-	if (mf_starpu_init(&conf, user, task, exp_id) == -1)
+/*unload starpu opencl*/
+#ifdef STARPU_USE_OPENCL
+	if (starpu_opencl_unload_opencl(&opencl_program) == -1) 
 		return -1;
-
-	struct starpu_task **training_tasks = malloc(TRAIN_LOOPS * sizeof(struct starpu_task *));
-
-	starpu_vector_data_register(&vector_handle, 0, (uintptr_t)vector, NX, sizeof(vector[0]));
-
-	long double start_time = mf_starpu_time();
-
-	for (i = 0; i < TRAIN_LOOPS; i++) {
-		struct starpu_task *task = starpu_task_create();
-		task->synchronous = 1; //important for mf_starpu
-		task->destroy = 0; //task will be destroyed by hand, important for mf_starpu
-		task->cl = &cl;
-
-		/* the codelet manipulates one buffer in RW mode */
-		task->handles[0] = vector_handle;
-
-		/* an argument is passed to the codelet, beware that this is a
-	 	* READ-ONLY buffer and that the codelet may be given a pointer to a
-	 	* COPY of the argument */
-		task->cl_arg = &factor;
-		task->cl_arg_size = sizeof(factor);
-
-		training_tasks[i] = task;
-		/* execute the task on any eligible computational ressource */
-		int ret = starpu_task_submit(task);
-		if(ret == -ENODEV){
-			printf("\n[ERROR] starpu_task_submit failed.\n");
-			return -1;
-		}
-	}
-
-	long double end_time = mf_starpu_time();
-
-	energy = (double) mf_starpu_get_energy(start_time, end_time, ALL_ENERGY) / TRAIN_LOOPS;
-	if(energy <= 0) {
-		printf("ERROR: mf_starpu_get_energy failed.\n");
-		return -1;
-	}
-
-	unsigned nimpl = 0;
-	for (i = 0; i < TRAIN_LOOPS; i++) {
-		mf_starpu_metrics_feed(training_tasks[i], nimpl, energy);
-		starpu_task_destroy(training_tasks[i]);
-	}
-
-	/* StarPU does not need to manipulate the array anymore so we can stop
- 	 * monitoring it */
-	starpu_data_unregister(vector_handle);
-	free(training_tasks);
+#endif
 	starpu_shutdown();
 	return 0;
 }

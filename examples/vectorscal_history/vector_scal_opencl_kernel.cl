@@ -17,11 +17,9 @@
 __kernel void vector_mult_opencl(unsigned int nx, __global float* val, float factor)
 {
         const int i = get_global_id(0);
-        float tmp;
         if (i < nx)
 	{
-		tmp = val[i];
+	val[i] = i+0.1;
         val[i] *= factor;
-        val[i] = tmp;
         }
 }
