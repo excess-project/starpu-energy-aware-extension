@@ -32,7 +32,7 @@ make install
 # get starpu
 STARPU_VERSION=1.2.0rc5
 cd $ROOT
-wget http://starpu.gforge.inria.fr/files/starpu-${STARPU_VERSION}.tar.gz
+wget http://gforge.inria.fr/frs/download.php/file/35412/starpu-${STARPU_VERSION}.tar.gz
 tar xf starpu-${STARPU_VERSION}.tar.gz
 cd starpu-${STARPU_VERSION}
 ./configure --prefix=${INSTALL_PATH_STARPU} --with-hwloc=${INSTALL_PATH_HWLOC}
@@ -43,6 +43,8 @@ make install
 cd $ROOT
 rm hwloc-1.11.2.tar.gz
 rm starpu-${STARPU_VERSION}.tar.gz
+rm -rf hwloc-1.11.2
+rm -rf starpu-${STARPU_VERSION}
 
 # ============================================================================ #
 # DOWNLOAD AND INSTALL MF                                                      #
@@ -63,14 +65,12 @@ echo "> monitoring server"
 cd ${INSTALL_PATH_MF}
 git clone https://github.com/excess-project/monitoring-server
 cd monitoring-server
-git checkout tags/1.0.1 -b 1.0.1
 ./setup.sh
 
 echo "> monitoring agent"
 cd ${INSTALL_PATH_MF}
 git clone https://github.com/excess-project/monitoring-agent
 cd monitoring-agent
-git checkout tags/1.0.1 -b 1.0.1
 ./setup.sh
 make
 make install
@@ -83,4 +83,5 @@ echo "Done"
 
 cd $ROOT
 git clone https://github.com/zserge/jsmn.git
+rm ext -rf
 mv jsmn ext
