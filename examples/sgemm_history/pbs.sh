@@ -1,6 +1,6 @@
 #!/bin/sh -f
-#the job name is "sgemm_mf_starpu"
-#PBS -N sgemm_mf_starpu
+#the job name is "sgemm_node03"
+#PBS -N sgemm_node03
 #PBS -q night
 
 #use the complite path to the standard output files
@@ -9,17 +9,17 @@
 #PBS -l walltime=00:30:00
 #PBS -l nodes=1:node03:ppn=24
 
+module load compiler/intel/parallel_studio_2017
 module load amd/app-sdk/3.0.124.132-GA
 module load mpi/mpich/3.1-gnu-4.9.2
 module load compiler/cuda/7.0
 module load numlib/intel/mkl/11.1
-module load compiler/intel/14.0.2
 module load compiler/gnu/4.9.2
 
-ROOT=/nas_home/hpcfapix/starpu-energy-aware-extension
+ROOT=/nas_home/hpcfapix/starpu-energy-extension
 
 LIB=${ROOT}/src
-LIB_MF=/opt/mf/stable/16.2/lib/
+LIB_MF=/opt/mf/stable/16.6/lib/
 PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${ROOT}/bin/starpu/lib/pkgconfig
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ROOT}/bin/starpu/lib:$LIB:${LIB_MF}
 export PKG_CONFIG_PATH
@@ -35,29 +35,34 @@ N=1
 ITER=10
 EXECUTABLE=${ROOT}/examples/sgemm_history/sgemm_mf_starpu
 
+#variables for libmfstarpu
+export MF_USER=hpcfapix
+export MF_TASKID=${PBS_JOBNAME}
+export MF_EXPID=${DBKEY}
+
 export STARPU_NCPU=1
-export STARPU_NCUDA=0
+export STARPU_NCUDA=0 # 0 GPU device is monitored 
 export STARPU_NOPENCL=0
 export STARPU_SCHED=dmda
 export STARPU_CALIBRATE=1
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ) [CPU] start sgemm_mf_starpu ..."
-	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user hpcfapix -task ${PBS_JOBNAME} -exp ${DBKEY}
+	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER}"
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done
 
 #start testing on gpu
 export STARPU_NCPU=0
-export STARPU_NCUDA=1
+export STARPU_NCUDA=1 # 1 GPU device is monitored 
 export STARPU_NOPENCL=0
 export STARPU_SCHED=dmda
 export STARPU_CALIBRATE=1
 sleep 5
 for SIZE in "${SIZE_ARRAY[@]}"; do
 	echo "$( date +'%c' ): [GPU] start sgemm_mf_starpu ..."
-	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user ${PBS_USER} -task ${PBS_JOBNAME} -exp ${DBKEY}"
-	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER} -user hpcfapix -task ${PBS_JOBNAME} -exp ${DBKEY}
+	echo "$( date +'%c' ) ${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER}"
+	${EXECUTABLE} -x ${SIZE} -y ${SIZE} -z ${SIZE} -nblocks ${N} -iter ${ITER}
 	echo "$( date +'%c' ): ending-------------------------------------------------------------------------------"
 done

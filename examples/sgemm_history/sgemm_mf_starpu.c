@@ -338,22 +338,13 @@ int main(int argc, char **argv)
 	niter /= 10;
 #endif
 
-	/*ret = starpu_init(NULL);
+	ret = starpu_init(NULL);
 	if (ret == -ENODEV)
 		return 77;
-	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");*/
-	char user[40] = {'\0'};
-	char task[40] = {'\0'};
-	char exp_id[40] = {'\0'};
+	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");
 
-	if(mf_starpu_get_user(argc, argv, user) == -1)
-		return -1;
-	if(mf_starpu_get_task(argc, argv, task) == -1)
-		return -1;
-	if(mf_starpu_get_experiment_id(argc, argv, exp_id)==-1)
-		return -1;
-
-	if (mf_starpu_init(NULL, user, task, exp_id) == -1)
+	/* mf_starpu_init initializes Monitoring Framework API */
+	if (mf_starpu_init() == -1)
 		return -1;
 
 	starpu_cublas_init();
@@ -389,6 +380,8 @@ int main(int argc, char **argv)
 			     goto enodev;
 			}
 			STARPU_CHECK_RETURN_VALUE(ret, "starpu_task_submit");*/
+			/* Trains the StarPU task with energy monitoring data 
+			 * The task may be executed for multiple times for getting more accurate energy values */
 			unsigned nimpl=0;
 			if(mf_starpu_task_training(task, nimpl)== -1) {
 				ret = 77;
