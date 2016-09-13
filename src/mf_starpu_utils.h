@@ -12,11 +12,11 @@
 /** @file mf_starpu_utils.h
  *  @brief Interface to train StarPU tasks with respect to energy consumption.
  *
- *  This interface declares a means to retrieve energy measurements from
+ *  This interface declares means to retrieve energy measurements from
  *  monitoring framework and then feed the values to StarPU power model.
  *  Please see the {@link } for a
  *  usage example. Per default, a developer should first determine if the
- *  library is installed (#libmfstarpu.a), then initialize StarPU and 
+ *  library is installed (#libmfstarpu.a), then initialize StarPU and initialize
  *  Monitoring Framework API via calling #mf_starpu_init, finally submitting 
  *  the training tasks with #mf_starpu_task_training.
  *
@@ -26,158 +26,59 @@
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
-//#include <stddef.h>
-
-/** @brief Macros for various ENERGY_TYPE of Monitoring Framework
- *  CPU_ENERGY: only CPU related metrics are collected
- *  GPU_ENERGY: only GPU related metrics are collected
- *  ALL_ENERGY: both CPU and GPU metrics are collected
- */
-#define CPU_ENERGY 1
-#define GPU_ENERGY 2
-#define ALL_ENERGY 3
-
 static const char SERVER[]= "http://192.168.0.160:3030";
 
-
-/** @brief feed a dummy task with performance and power model using the value measured 
+/** @brief Initializes Monitoring Framework API
  *
- *  This function can be called for keeping records of asynchronous tasks.
- *
+ *  This function initializes the mf_api with user, task and exp_id.
+ *  The three variables are set through associated system environments.
+ *  During the initialization phase, also number of cpu sockets and gpu devices
+ *  are counted, for preparing the metrics for data retrieving
+ * 
+ *  @return 0 on success; -1 otherwise
  */
-void mf_starpu_asynchronous_feed(long double start_t, long double end_t, double energy, struct starpu_perfmodel_arch *arch);
+int mf_starpu_init(void);
 
 
-/** @brief Train StarPU task with power model
+/** @brief Gets the current timestamps in seconds
+ *
+ *  @return current timestamp
+ */
+double mf_starpu_time(void);
+
+
+/** @brief Gets the energy value during the time interval.
+ *
+ *  The function prepares the metrics for CPUs and GPUs power measurements,
+ *  then the average power values are accumulated and energy is calculated by
+ *  power times time.
+ *
+ *  @return energy value
+ */
+double mf_starpu_get_energy(double start_t, double end_t);
+
+
+/** @brief Trains StarPU task with energy monitoring data
  *
  *  This function should be called after #mf_starpu_init, 
  *  in this function timestamps are kept before and after tasks execution,
- *  then energy measurements is retrieved and feed into the task's
- *  power model. 
+ *  then the energy value is retrieved and feed into the task's
+ *  power model.
+ *
+ *  If a task's execution time is less than 2 seconds, the task will be 
+ *  executed for 2 seconds in a loop
  *
  *  @return 0 on success; -1 otherwise
  */
 int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl);
 
 
-/** @brief Show StarPU prediction of the task's execution time and energy 
- *
- *  This function shows the predicted time and energy of a trained StarPU
- *  task.
- *
- */
-void mf_starpu_show_expectation(struct starpu_task *task, unsigned nimpl);
-
-
-/** @brief Feed StarPU task power model with the measured energy
+/** @brief Feeds StarPU task power model with the measured energy value
  * 
  *  This function is called inside #mf_starpu_task_train, but can also be called 
  *  by general StarPU programms.
  *
  */
 void mf_starpu_metrics_feed(struct starpu_task *task, unsigned nimpl, double energy);
-
-
-/** @brief Collects the avergae value of a given metric during the time interval.
- *
- *  This function using mf_api.h and jsmn.h to get the average value of a given metric,
- *  which the monitoring framework measures.
- *
- *  @return average value of the metric
- */
-float get_mf_power_data(long double start_time, long double end_time, char *Metric);
-
-
-/** @brief Collects energy consumption of GPU during the time interval.
- *
- *  This function collects "GPU0:power" and "GPU1:power" based on nvidia plug-in
- *  of the monitoring framework.
- *
- *  @return sum of energy of GPU
- */
-double get_gpu_energy(long double start_time, long double end_time);
-
-
-/** @brief Collects energy consumption of CPU during the time interval.
- *
- *  This function collects "PACKAGE_POWER:PACKAGE0", "PACKAGE_POWER:PACKAGE1" 
- *  "DRAM_POWER:PACKAGE0", and "DRAM_POWER:PACKAGE1" based on rapl plug-in
- *  of the monitoring framework.
- *
- *  @return sum of energy of CPU
- */
-double get_cpu_energy(long double start_time, long double end_time);
-
-
-/** @brief Get the energy value during the time interval according to different
- *  energy types.
- *
- *  When ENERGY_TYPE = CPU_ENERGY: only CPU related metrics are collected
- *  When ENERGY_TYPE = GPU_ENERGY: only GPU related metrics are collected
- *  When ENERGY_TYPE = ALL_ENERGY: both CPU and GPU metrics are collected
- *
- *  @return energy value
- */
-double mf_starpu_get_energy(long double start_t, long double end_t, unsigned ENERGY_TYPE);
-
-
-/** @brief Get user(workflow)(PBS_USER) for accessing monitoring framework
- *
- *  This function reads the input arguments after "-user" as the user
- *  
- *  @return 0 on success; -1 otherwise
- */
-int mf_starpu_get_user(int argc, char **argv, char *user);
-
-
-/** @brief Get task(task)(PBS_JOBNAME) for accessing monitoring framework
- *
- *  This function reads the input arguments after "-task" as the task
- *  
- *  @return 0 on success; -1 otherwise
- */
-int mf_starpu_get_task(int argc, char **argv, char *task);
-
-
-/** @brief Get experiment_id(experiment_id)(DBKEY) for accessing monitoring framework
- *
- *  This function reads the input arguments after "-exp" as the experiment_id
- *  
- *  @return 0 on success; -1 otherwise
- */
-int mf_starpu_get_experiment_id(int argc, char **argv, char *exp_id);
-
-
-/** @brief Get train loops for the StarPU task
- *
- *  This function reads the input arguments after "-train" as the number of
- *  train loops.
- *
- *  @return 0 on success; -1 otherwise
- */
-int mf_starpu_get_train_loops(int argc, char **argv);
-
-
-/** @brief Initialize StarPU and Monitoring Framework API
- *
- *  This function initialize StarPU with given #conf, or default configuration
- *  if #conf=NULL, then mf_api is initialized with given execution id.
- * 
- *  @return 0 on success; -1 otherwise
- */
-int mf_starpu_init(struct starpu_conf *conf, char *user, char *task, char *exp_id);
-
-
-/** @brief Get the current timestamps in seconds
- *
- *  @return current timestamp
- */
-long double mf_starpu_time(void);
-
-
-/** @brief convert given timestamps in seconds to timeval structure
- *
- */
-void convert_time(long double seconds, struct timeval *tv);
 
 #endif
