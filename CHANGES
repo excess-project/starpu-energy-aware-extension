@@ -29,3 +29,23 @@
 - Scripts are provided to setup prerequisites and set environments on the EXCESS cluster.
 - Makefile is able to build the source based on local machine or on the EXCESS cluster.
 - Examples are combined with pbs job scripts for submitting to the EXCESS cluster.
+
+
+
+## 1.2 (09/09/2016)
+
+### Features
+- StarPU Monitoring Broker is compatible with mf_agent (version 16.6, the latest version) now with reduced APIs as follows:
+
+	int mf_starpu_init(void);
+	double mf_starpu_time(void);
+	double mf_starpu_get_energy(double start_t, double end_t);
+	int mf_starpu_task_training(struct starpu_task *task, unsigned nimpl);
+	void mf_starpu_metrics_feed(struct starpu_task *task, unsigned nimpl, double energy);
+- For initializing the StarPU Monitoring Broker, users are required to set the following environments:
+	MF_USER=${PBS_USER}
+	MF_TASKID=${PBS_JOBNAME}
+	MF_EXPID=${DBKEY}
+	STARPU_NCUDA=${NUM_GPUS} 
+- Scripts, Makefiles and source code documentation are added.
+- New example "mpi_cholesky" is added, showing how the starpu mpi works with the Monitoring Broker API.

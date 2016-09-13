@@ -11,9 +11,6 @@ StarPU power model type is "STARPU_HISTORY_BASED".
 
 Following functions of Monitoring Broker are used:
 
-- mf_starpu_get_user
-- mf_starpu_get_task
-- mf_starpu_get_experiment_id
 - mf_starpu_init
 - mf_starpu_task_training
 
@@ -29,28 +26,17 @@ Other implementations is the same as dgemm_history.
 
 ## vectorscal_history
 
-This example performs scaling an array by a factor using StarPU. 
+This example performs scaling an array by a factor using StarPU. Same functions of the Monitoring Broker are used as the above two examples.
 
-StarPU power model type is "STARPU_HISTORY_BASED".
+
+## mpi_cholesky
+
+Cholesky decomposition is distributed on two nodes of EXCESS cluster by MPI (Message Passing Interface) controlled by StarPU in this example. 
 
 Following functions of Monitoring Broker are used:
 
-- mf_starpu_get_user
-- mf_starpu_get_task
-- mf_starpu_get_experiment_id
-- mf_starpu_get_train_loops
 - mf_starpu_init
 - mf_starpu_time
 - mf_starpu_get_energy
-- mf_starpu_metrics_feed
 
-After #mf_starpu_init, StarPU task create, handle the registered data set, and task submission are done inside a train loop, while timestamps are captured around the loop. Number of train loops equals to the number of tasks, which StarPU created. Before the tasks are destroyed by hand, energy data is fetched and feed for each trained task.
-
-To enable real data calculation and data transfers, all values of the array are generated inside the task codelet. 
-
-
-## vectorscal_regression
-
-This example performs scaling an array by a factor using StarPU. 
-
-Only difference with "vectorscal_history" is that the StarPU power model type is "STARPU_REGRESSION_BASED".
+After the execution, the energy consumption for each cpu is reported during its execution time.

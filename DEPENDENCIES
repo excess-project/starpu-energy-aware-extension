@@ -3,6 +3,10 @@
 
 # List of Dependencies
 
-| Component         | Homepage                                          | Version   |
-|------------------ |-------------------------------------------------  |---------  |
-| JSMN              | https://github.com/zserge/jsmn                    | N/A       |
+| Component         | Homepage                                            | Version   |
+|------------------ |---------------------------------------------------  |---------  |
+| hwloc             | https://www.open-mpi.org/software/hwloc             | 1.11.2    |
+| StarPU            | http://gforge.inria.fr                              | 1.2.0rc5  |
+| JSMN              | https://github.com/zserge/jsmn                      | N/A       |
+| monitoring agent  | https://github.com/excess-project/monitoring-agent  | 16.6      |
+| monitoring server | https://github.com/excess-project/monitoring-server | 16.8      |
