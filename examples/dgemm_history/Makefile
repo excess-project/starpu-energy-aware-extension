@@ -1,5 +1,5 @@
 CC       = icc
-CFLAGS   = -O3 -g -openmp $(INC_MF) $(INC_STARPU) ${INC_STARPUEXT}
+CFLAGS   = -O3 -g -qopenmp $(INC_MF) $(INC_STARPU) ${INC_STARPUEXT}
 LFLAGS   = $(MF_LIB) $(PARSER_LIB) $(PUBLISHER_LIB) ${MF_STARPU_LIB} -Wl,-rpath-link,lib
 CFLAGS  += $(shell pkg-config --cflags starpu-1.2)
 LDFLAGS += $(shell pkg-config --libs starpu-1.2)
@@ -14,8 +14,8 @@ CORE_LIBS=../../bin/mf/monitoring-agent/lib
 HOST=$(shell hostname)
 
 ifneq (,$(findstring excess,$(HOST)))
-	INC_MF=-I/opt/mf/stable/16.2/include
-	CORE_LIBS=/opt/mf/stable/16.2/lib
+	INC_MF=-I/opt/mf/stable/16.6/include
+	CORE_LIBS=/opt/mf/stable/16.6/lib
 endif
 
 MF_LIB=-L$(CORE_LIBS) -lmf
